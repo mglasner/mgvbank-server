@@ -2,6 +2,7 @@ require("dotenv").config();
 const routes = require("./routes/routes");
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const mongoString = process.env.DATABASE_URL;
 
@@ -15,7 +16,9 @@ database.on("error", (error) => {
 database.once("connected", () => {
   console.log("Database Connected");
 });
+
 const app = express();
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use("/api", routes);
