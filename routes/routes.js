@@ -59,7 +59,7 @@ router.patch("/users/deposit/:email", async (req, res) => {
     if (isNaN(deposit)) {
       return res.status(400).send({ error: "deposit must be a number" });
     }
-    user.history.push(deposit);
+    user.history.push({ type: "deposit", amount: deposit });
     await user.save();
     res.json({ status: "deposit succed", user: user });
   } catch (error) {
@@ -85,7 +85,7 @@ router.patch("/users/withdraw/:email", async (req, res) => {
     if (withdraw > balance) {
       return res.status(400).send({ error: "not enough found" });
     }
-    user.history.push(-1 * withdraw);
+    user.history.push({ type: "withdraw", amount: -1 * withdraw });
     await user.save();
     res.json({ status: "withdraw succed", user: user });
   } catch (error) {

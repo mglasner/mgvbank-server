@@ -9,14 +9,19 @@ const dataSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-  balance: {
-    required: true,
-    type: Number,
-    default: 0,
-  },
   history: {
-    required: true,
-    type: [Number],
+    type: [
+      {
+        type: {
+          type: String,
+          required: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
     default: [],
   },
 });
