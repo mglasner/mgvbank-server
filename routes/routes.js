@@ -93,49 +93,56 @@ router.patch("/users/withdraw/:email", async (req, res) => {
   }
 });
 
-//Make transfer
+// transfer
 router.patch("/users/transfer/", async (req, res) => {
   try {
-    const fromUser = await Model.findOne({ email: req.body.from });
-    const toUser = await Model.findOne({ email: req.body.to });
-    if (!req.body.from) {
-      return res.status(404).send({ error: "from parameter not found" });
+    const { from, to, amount } = req.body;
+    if (!from) {
+      return res.status(400).send({ error: "from parameter not found" });
     }
-    if (!req.body.to) {
-      return res.status(404).send({ error: "to parameter not found" });
+    if (!to) {
+      return res.status(400).send({ error: "to parameter not found" });
     }
-    if (!req.body.amount) {
-      return res.status(404).send({ error: "amount parameter not found" });
+    if (!amount) {
+      return res.status(400).send({ error: "amount parameter not found" });
     }
+
+    const fromUser = await Model.findOne({ email: from });
+    const toUser = await Model.findOne({ email: to });
+
     if (!fromUser) {
-      return res.status(404).send({ error: `user ${req.body.from} not found` });
+      return res.status(404).send({ error: `user ${from} not found` });
     }
     if (!toUser) {
-      return res.status(404).send({ error: `user ${req.body.to} not found` });
+      return res.status(404).send({ error: `user ${to} not found` });
     }
-    const amount = Number(req.body.amount);
-    if (isNaN(amount)) {
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount)) {
       return res.status(400).send({ error: "amount must be a number" });
     }
-    const balance = fromUser.history.reduce((acc, val) => acc + val, 0);
-    if (amount > balance) {
-      return res.status(400).send({ error: "not enough found" });
+
+    const balance = fromUser.history.reduce((acc, val) => acc + val.amount, 0);
+    if (parsedAmount > balance) {
+      return res.status(400).send({ error: "not enough funds" });
     }
+
     fromUser.history.push({
       type: "transfer",
       to: toUser.email,
-      amount: -1 * amount,
+      amount: -1 * parsedAmount,
     });
     toUser.history.push({
       type: "transfer",
       from: fromUser.email,
-      amount: amount,
+      amount: parsedAmount,
     });
 
     await fromUser.save();
     await toUser.save();
+
     res.json({
-      status: `transfer succed from ${fromUser.email} to ${toUser.email}`,
+      status: `transfer succeeded from ${fromUser.email} to ${toUser.email}`,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
