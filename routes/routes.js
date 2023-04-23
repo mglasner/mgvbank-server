@@ -59,10 +59,36 @@ router.patch("/users/deposit/:email", async (req, res) => {
     if (isNaN(deposit)) {
       return res.status(400).send({ error: "deposit must be a number" });
     }
-    user.history.push(req.body.deposit);
+    user.history.push(deposit);
     await user.save();
     res.json({ status: "deposit succed", user: user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//Make withdraw
+router.patch("/users/withdraw/:email", async (req, res) => {
+  try {
+    const user = await Model.findOne({ email: req.params.email });
+    if (!user) {
+      return res.status(404).send({ error: "user not found" });
+    }
+    if (!req.body.withdraw) {
+      return res.status(404).send({ error: "withdraw not found" });
+    }
+    const withdraw = Number(req.body.withdraw);
+    if (isNaN(withdraw)) {
+      return res.status(400).send({ error: "withdraw must be a number" });
+    }
+    const balance = user.history.reduce((acc, val) => acc + val, 0);
+    if (withdraw > balance) {
+      return res.status(400).send({ error: "not enough found" });
+    }
+    user.history.push(-1 * withdraw);
+    await user.save();
+    res.json({ status: "withdraw succed", user: user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
