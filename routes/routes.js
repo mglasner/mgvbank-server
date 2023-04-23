@@ -35,10 +35,33 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
+//Get by email Method
 router.get("/users/email/:email", async (req, res) => {
   try {
     const data = await Model.findOne({ email: req.params.email });
     res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+//Make deposit
+router.patch("/users/deposit/:email", async (req, res) => {
+  try {
+    const user = await Model.findOne({ email: req.params.email });
+    if (!user) {
+      return res.status(404).send({ error: "user not found" });
+    }
+    if (!req.body.deposit) {
+      return res.status(404).send({ error: "deposit not found" });
+    }
+    const deposit = Number(req.body.deposit);
+    if (isNaN(deposit)) {
+      return res.status(400).send({ error: "deposit must be a number" });
+    }
+    user.history.push(req.body.deposit);
+    await user.save();
+    res.json({ status: "deposit succed", user: user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
