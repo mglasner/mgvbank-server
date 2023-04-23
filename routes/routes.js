@@ -117,7 +117,10 @@ router.patch("/users/transfer/", async (req, res) => {
     if (isNaN(amount)) {
       return res.status(400).send({ error: "amount must be a number" });
     }
-
+    const balance = fromUser.history.reduce((acc, val) => acc + val, 0);
+    if (amount > balance) {
+      return res.status(400).send({ error: "not enough found" });
+    }
     fromUser.history.push({
       type: "transfer",
       to: toUser.email,
