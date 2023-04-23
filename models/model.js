@@ -20,6 +20,14 @@ const dataSchema = new mongoose.Schema({
           type: Number,
           required: true,
         },
+        from: {
+          type: String,
+          required: false,
+        },
+        to: {
+          type: String,
+          required: false,
+        },
       },
     ],
     default: [],

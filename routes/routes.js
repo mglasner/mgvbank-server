@@ -92,3 +92,49 @@ router.patch("/users/withdraw/:email", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+//Make transfer
+router.patch("/users/transfer/", async (req, res) => {
+  try {
+    const fromUser = await Model.findOne({ email: req.body.from });
+    const toUser = await Model.findOne({ email: req.body.to });
+    if (!req.body.from) {
+      return res.status(404).send({ error: "from parameter not found" });
+    }
+    if (!req.body.to) {
+      return res.status(404).send({ error: "to parameter not found" });
+    }
+    if (!req.body.amount) {
+      return res.status(404).send({ error: "amount parameter not found" });
+    }
+    if (!fromUser) {
+      return res.status(404).send({ error: `user ${req.body.from} not found` });
+    }
+    if (!toUser) {
+      return res.status(404).send({ error: `user ${req.body.to} not found` });
+    }
+    const amount = Number(req.body.amount);
+    if (isNaN(amount)) {
+      return res.status(400).send({ error: "amount must be a number" });
+    }
+
+    fromUser.history.push({
+      type: "transfer",
+      to: toUser.email,
+      amount: -1 * amount,
+    });
+    toUser.history.push({
+      type: "transfer",
+      from: fromUser.email,
+      amount: amount,
+    });
+
+    await fromUser.save();
+    await toUser.save();
+    res.json({
+      status: `transfer succed from ${fromUser.email} to ${toUser.email}`,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
