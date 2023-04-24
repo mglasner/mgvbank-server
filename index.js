@@ -18,7 +18,18 @@ database.once("connected", () => {
 });
 
 const app = express();
-app.use(cors({ origin: "http://localhost:3000" }));
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use("/api", routes);
