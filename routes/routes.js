@@ -4,7 +4,29 @@ const router = express.Router();
 
 module.exports = router;
 
-//Post Method
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     description: Get the data for every user
+ */
+router.get("/users", async (req, res) => {
+  try {
+    const data = await Model.find();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create new users
+ *     description: Create new users an store their name and email into the database
+ */
 router.post("/users", async (req, res) => {
   const data = new Model({ name: req.body.name, email: req.body.email });
   try {
@@ -15,17 +37,13 @@ router.post("/users", async (req, res) => {
   }
 });
 
-//Get all Method
-router.get("/users", async (req, res) => {
-  try {
-    const data = await Model.find();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-//Get by ID Method
+/**
+ * @swagger
+ * /users:id:
+ *   get:
+ *     summary: Get user by id
+ *     description: Get the data from user by its unique database id
+ */
 router.get("/users/:id", async (req, res) => {
   try {
     const data = await Model.findById(req.params.id);
@@ -35,7 +53,13 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
-//Get by email Method
+/**
+ * @swagger
+ * /users/email:email:
+ *   get:
+ *     summary: Get user by email
+ *     description: Get the data from user by its unique firestore email
+ */
 router.get("/users/email/:email", async (req, res) => {
   try {
     const data = await Model.findOne({ email: req.params.email });
@@ -45,7 +69,13 @@ router.get("/users/email/:email", async (req, res) => {
   }
 });
 
-//Make deposit
+/**
+ * @swagger
+ * /users/deposit/:mail:
+ *   patch:
+ *     summary: Makes deposits into user account
+ *     description: Makes deposit into user account based on email provided
+ */
 router.patch("/users/deposit/:email", async (req, res) => {
   try {
     const user = await Model.findOne({ email: req.params.email });
@@ -67,7 +97,13 @@ router.patch("/users/deposit/:email", async (req, res) => {
   }
 });
 
-//Make withdraw
+/**
+ * @swagger
+ * /users/withdraw/:mail:
+ *   patch:
+ *     summary: Makes withdraws from user account
+ *     description: Makes withdraws from user account based on email provided
+ */
 router.patch("/users/withdraw/:email", async (req, res) => {
   try {
     const user = await Model.findOne({ email: req.params.email });
@@ -93,7 +129,13 @@ router.patch("/users/withdraw/:email", async (req, res) => {
   }
 });
 
-// transfer
+/**
+ * @swagger
+ * /users/transfer:
+ *   patch:
+ *     summary: Makes transfer between users
+ *     description: Makes transfer between users based on 'from', 'to', and 'amount' body parameters
+ */
 router.patch("/users/transfer/", async (req, res) => {
   try {
     const { from, to, amount } = req.body;
